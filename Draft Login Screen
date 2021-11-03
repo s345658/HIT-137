@@ -1,0 +1,56 @@
+############################################################################
+
+######### Login Screen for the Restaurant Order Management System ##########
+
+############################################################################
+
+from tkinter import*
+from PIL import ImageTk #pip install pillow
+from tkinter import messagebox
+
+
+class Login_Screen:
+        def __init__(self,root):
+                self.root=root
+                self.root.title("LOGIN SYSTEM")
+                self.root.geometry("1000x550+190+80")
+                self.root.resizable(False,False)
+                
+########## Backgroung image on Login Screen Window ###########
+                self.background=ImageTk.PhotoImage(file="login_background.jpg")
+                self.background_image=Label(self.root,image=self.background).place(x=0,y=0,relwidth=1,relheight=1)
+                
+########## Creating the Login Screen Frame ###################
+                login_rame=Frame(self.root,bg="#F6ECEA")
+                login_rame.place(x=70,y=120,width=400,height=320)
+                
+########## Creating Labels and Entry Box on Login Frame ######
+                screen_label=Label(login_rame,text="Login Here",font=("Britannic Bold",40,"bold"),fg="#FB0505").place(x=65,y=14)
+                sub_label=Label(login_rame,text="Restaurant Order System",font=("Goudy Old style",15,"bold"),fg="#FB0505").place(x=90,y=75)
+                
+                
+                userid_label=Label(login_rame,text="User ID",font=("Verdana Pro Black",14,"bold"),fg="#000000").place(x=80,y=125)
+                self.user_entry=Entry(login_rame,font=("Calibri",14,"bold"),bg="lightgray")
+                self.user_entry.place(x=80,y=150,width=250,height=35)
+                
+                password_label=Label(login_rame,text="Password",font=("Verdana Pro Black",14,"bold"),fg="#000000").place(x=80,y=195)
+                self.password_entry=Entry(login_rame,show="*",font=("Calibri",14,"bold"),bg="#C0C0C0")
+                self.password_entry.place(x=80,y=220,width=250,height=35)
+                
+                forget_button=Button(login_rame,text="Forget Password?",cursor="hand2",bd=0,font=("times new roman",10,'bold'),fg="#FB0505").place(x=80,y=260)
+                Login_button=Button(self.root,command=self.login_function,cursor="hand2",text="Login",fg="#FFFFFF",bg="#FB0505",font=("times new roman",15)).place(x=175,y=420,width=180,height=40)
+        
+        
+        def login_function(self):
+                if self.password_entry.get()=="" or self.user_entry.get()=="":
+                        messagebox.showerror("Error", "All fields are required",parent=self.root)
+                        
+                elif self.password_entry.get()!="1234567" or self.user_entry.get()!="George":
+                        messagebox.showerror("Error", "Invalid Username/Password",parent=self.root)
+                
+                else:
+                        messagebox.showinfo("Welcome", f"Welcome {self.user_entry.get()}\nYour Password: {self.password_entry.get()}", parent=self.root)
+                      
+root=Tk()
+obj=Login_Screen(root) #calling function
+root.mainloop()
