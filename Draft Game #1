@@ -1,0 +1,335 @@
+# Spacewar HIT137 Software Now by Group #
+
+import random
+import time
+import pygame
+from pygame import mixer
+
+#Import Turle Package
+import turtle
+
+#Initilaize Pygame
+pygame.init()
+
+#Setup the Screen
+window = turtle.Screen()
+
+#Change Window Title
+window.title ("Spacewar created by Group# ")
+
+#Change backgropund color
+window.bgpic("space.gif")
+
+#Playbackground sound
+mixer.music.load('background.wav')
+mixer.music.play(-1)
+
+# register the shapes
+turtle.register_shape("ufo.gif")
+turtle.register_shape("plane.gif")
+
+#Set the animation speed to maximum
+turtle.speed(0)
+
+#Hide the default Turtle
+turtle.hideturtle()
+
+#Speeds up the Drawing
+turtle.tracer(0)
+
+class Game():
+    def __init__(body):
+        body.level = 1
+        body.score = 0
+        body. state = "playing"
+        body.pen = turtle.Turtle()
+        body.lives = 3
+    def draw_border(body):
+        #Draw border
+        body.pen.speed(0)
+        body.pen.color("white")
+        body.pen.pensize (3)
+        body.pen.penup()
+        body.pen.goto(-300, 300)
+        body.pen.pendown()
+        for side in range (4):
+            body.pen.forward(600)
+            body.pen.right(90)
+        body.pen.penup()
+        body.pen.hideturtle()
+        body.pen.pendown()
+        
+        #Score
+    def show_status(body):
+        body.pen.undo()
+        msg = "Score: %s" % (body.score)
+        body.pen.penup()
+        body.pen.goto(-300, 300)
+        body.pen.write(msg, font=("Arial", 14, "normal"))
+        
+
+class Sprite(turtle.Turtle):
+    def __init__(body, shape, color, beginx, beginy):
+        turtle.Turtle.__init__(body, shape)
+        body.speed(0)
+        body.penup()
+        body.color(color)
+        body.forward(0)
+        body.goto (beginx, beginy)
+        body.speed = 1
+        
+    def move(body):
+        body.forward(body.speed)
+        
+        #Boundary Detection
+        if body.xcor() > 290:
+            body.setx(290)
+            body.right(45)
+        
+        if body.xcor() < -290:
+            body.setx(-290)
+            body.right(45)
+            
+        if body.ycor() > 290:
+            body.sety(290)
+            body.right(45)
+            
+        if body.ycor() < -290:
+            body.sety(-290)
+            body.right(45)
+            
+    #Collision Detection
+    def collision(body, position):
+        if (body.xcor() >= (position.xcor()-20)) and \
+        (body.xcor() <= (position.xcor()+20)) and \
+        (body.ycor() >= (position.ycor()-20)) and \
+        (body.ycor() <= (position.ycor()+20)):
+            return True
+        else:
+            return False
+              
+class Player(Sprite): 
+    def __init__(body, shape, color, beginx, beginy):
+        Sprite.__init__(body, shape, color, beginx, beginy)
+        body.shapesize(stretch_wid=0.8, stretch_len=1.3, outline = None)
+        body.speed = 1
+        body.lives = 3
+    
+    def turn_left(body):
+        body.left(30)
+
+    def turn_right(body):
+        body.right(30)
+        
+    def accelerate(body):
+        body.speed += 2
+    
+    def decelerate(body):
+        body.speed -= 1
+    
+    
+class UFO(Sprite): 
+    def __init__(body, shape, color, beginx, beginy):
+        Sprite.__init__(body, shape, color, beginx, beginy)   
+        body.speed = 6
+        body.setheading(random.randint(0,360))
+ 
+ 
+class Plane(Sprite): 
+    def __init__(body, shape, color, beginx, beginy):
+        Sprite.__init__(body, shape, color, beginx, beginy)   
+        body.speed = 3
+        body.setheading(random.randint(0,360))
+    
+    def move(body):
+        body.forward(body.speed)
+        
+        #Boundary Detection
+        if body.xcor() > 290:
+            body.setx(290)
+            body.left(45)
+        
+        if body.xcor() < -290:
+            body.setx(-290)
+            body.left(45)
+            
+        if body.ycor() > 290:
+            body.sety(290)
+            body.left(45)
+            
+        if body.ycor() < -290:
+            body.sety(-290)
+            body.left(45)
+ 
+ 
+class Missile(Sprite): 
+    def __init__(body, shape, color, beginx, beginy):
+        Sprite.__init__(body, shape, color, beginx, beginy) 
+        body.shapesize (stretch_wid=0.2, stretch_len=0.4, outline=None)
+        body.speed = 25
+        body.status = "ready"
+        body.goto(-500, 500)
+            
+    def fire(body):
+        if body.status == "ready":
+            #Play missile sound
+            bullet_sound = mixer.Sound('Laser.mp3')
+            bullet_sound.play()
+            body.goto(player.xcor(), player.ycor())
+            body.setheading(player.heading())
+            body.status = "firing"
+             
+    def move(body): 
+        if body.status == "ready":
+            body.goto(-500, 500)
+        if body.status == "firing":
+            body.forward(body.speed)
+            
+        #Border Check
+        if body.xcor() < -290 or body.xcor() >290 or \
+            body.ycor() < -290 or body. ycor() >290:
+            body.goto (-500, 500)
+            body.status = "ready"
+      
+            
+class Particle(Sprite): 
+    def __init__(body, shape, color, beginx, beginy):
+        Sprite.__init__(body, shape, color, beginx, beginy)  
+        body.shapesize (stretch_wid=0.1, stretch_len=0.1, outline=None) 
+        body.goto(-500, -500)
+        body.frame = 0
+    
+    def explosion (body, beginx, beginy):
+        body.goto(beginx, beginy)
+        body.setheading(random.randint (0, 360))
+        body.frame = 1   
+    
+    def move (body):
+        if body.frame > 0:
+            body.forward(10)
+            body.frame +=1
+            
+        if body.frame > 15:
+            body.frame = 0
+            body.goto(-500, -500)
+               
+
+#Create game object
+game = Game()
+
+#Draw the game border
+game.draw_border()
+
+#Show the game status
+game.show_status()
+
+               
+#Create my sprites
+player = Player("triangle", "red", 0, 0)
+
+missile = Missile ("triangle", "yellow", 0, 0)
+
+UFOs =[]
+for i in range(7):
+    UFOs.append (UFO ("ufo.gif", "white", -100, 0))
+    
+planes =[]
+for i in range(3):
+    planes.append(Plane ("plane.gif", "white", 100, 0))
+
+particles =[]
+for i in range (20):
+    particles.append(Particle ("circle", "yellow", 0, 0))
+
+#Keyboard bindings
+turtle.onkey(player.turn_left, "Left")
+turtle.onkey(player.turn_right, "Right")
+turtle.onkey(player.accelerate, "Up")
+turtle.onkey(player.decelerate, "Down")
+turtle.onkey(missile.fire, "space")
+turtle.listen()
+
+
+#Main game Loop
+while True:
+    turtle.update()
+    time.sleep(0.02) 
+    
+    player.move()
+    missile.move()
+    
+    for particle in particles:
+        particle.move()
+        
+    for UFO in UFOs:
+        UFO.move()
+        
+        #Check for collosion between missile and UFO
+        if missile.collision(UFO):
+            #Play explosion sound
+            explosion_sound = mixer.Sound('Explosion.mp3')
+            explosion_sound.play()
+            #UFO will reappear on random location
+            x = random.randint (-290, 290)
+            y = random.randint (-290, 290)
+            UFO.goto(x, y)
+            missile.status = "ready"
+            #Increase the score
+            game.score += 100
+            game.show_status()
+            #Do the explosion
+            for particle in particles:
+                particle.explosion(missile.xcor(), missile.ycor())
+        
+        #Check for Player collosion with UFO
+        if player.collision(UFO):
+            #Play explosion sound
+            explosion_sound = mixer.Sound('Explosion.mp3')
+            explosion_sound.play()
+            #UFO will reappear on random location
+            x = random. randint(-290, 290)
+            y = random. randint(-290, 290)
+            UFO.goto(x,y)
+            #Decrease the score
+            game.score -= 50
+            game.show_status()
+            #Do the explosion
+            for particle in particles:
+                particle.explosion(player.xcor(), player.ycor())
+                      
+    for plane in planes:
+        plane.move()
+        
+        #Check for Player Collision with Plane
+        if player.collision(plane):
+            #Play explosion sound
+            explosion_sound = mixer.Sound('Explosion.mp3')
+            explosion_sound.play()
+            #Plane will reappear on random location
+            x = random. randint(-290, 290)
+            y = random. randint(-290, 290)
+            plane.goto(x,y)
+            #Decrease the score
+            game.score -= 50
+            game.show_status()
+            #Do the explosion
+            for particle in particles:
+                particle.explosion(player.xcor(), player.ycor())
+                
+        #Check for collosion between missile and Plane
+        if missile.collision(plane):
+            #Play explosion sound
+            explosion_sound = mixer.Sound('Explosion.mp3')
+            explosion_sound.play()
+            #Plane will reappear on random location
+            x = random.randint(-290, 290)
+            y = random.randint(-290, 290)
+            plane.goto(x,y)
+            #Decrease the score
+            game.score -= 50
+            game.show_status()
+            #Do the explosion
+            for particle in particles:
+                particle.explosion(missile.xcor(), missile.ycor())
+            
+
